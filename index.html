@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>YT Mentor Pro v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#07070f;--s1:#0e0e1c;--s2:#151525;--s3:#1c1c2e;
+  --border:#252538;--red:#ff2d55;--ora:#ff6b35;--gold:#ffc842;
+  --grn:#00e87a;--blu:#00b4ff;--pur:#a855f7;--pin:#ff6eb4;
+  --txt:#eeeeff;--mut:#7777aa;
+  --fd:'Bebas Neue',sans-serif;--fb:'DM Sans',sans-serif;--fm:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--txt);font-family:var(--fb);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 5% 0%,rgba(255,45,85,.09) 0%,transparent 55%),radial-gradient(ellipse 50% 35% at 95% 100%,rgba(0,180,255,.06) 0%,transparent 55%);pointer-events:none;z-index:0;}
+
+/* SETUP */
+.setup{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;transition:opacity .4s,transform .4s;}
+.setup.gone{opacity:0;transform:scale(.96);pointer-events:none;}
+.setup-logo{font-family:var(--fd);font-size:52px;letter-spacing:5px;background:linear-gradient(135deg,var(--red),var(--ora));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;margin-bottom:6px;}
+.setup-tagline{font-size:13px;color:var(--mut);text-align:center;margin-bottom:36px;line-height:1.7;}
+.setup-card{background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:24px;width:100%;max-width:400px;position:relative;overflow:hidden;}
+.setup-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--red),var(--ora),var(--gold));}
+.slbl{font-size:10px;color:var(--mut);font-family:var(--fm);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;display:block;margin-top:16px;}
+.sinp{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:13px 15px;color:var(--txt);font-family:var(--fm);font-size:13px;outline:none;transition:border-color .2s;}
+.sinp:focus{border-color:var(--red);}
+.sinp::placeholder{color:var(--mut);font-family:var(--fb);}
+.hint{font-size:11px;color:var(--mut);margin:12px 0 20px;line-height:1.6;padding:10px 12px;background:rgba(255,200,66,.05);border-radius:8px;border-left:2px solid var(--gold);}
+.sbtn{width:100%;padding:14px;background:linear-gradient(135deg,var(--red),var(--ora));border:none;border-radius:10px;color:#fff;font-family:var(--fb);font-weight:600;font-size:15px;cursor:pointer;transition:opacity .2s,transform .2s;margin-top:4px;}
+.sbtn:hover{opacity:.9;transform:translateY(-1px);}
+
+/* APP */
+.app{position:relative;z-index:1;display:none;}
+.app.on{display:block;}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:100;background:rgba(7,7,15,.94);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:11px 16px;display:flex;align-items:center;justify-content:space-between;}
+.hdr-l{display:flex;align-items:center;gap:8px;}
+.hdr-ico{width:30px;height:30px;background:linear-gradient(135deg,var(--red),var(--ora));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.hdr-name{font-family:var(--fd);font-size:20px;letter-spacing:2px;background:linear-gradient(135deg,var(--red),var(--ora));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hdr-r{display:flex;align-items:center;gap:8px;}
+.api-ok{font-size:9px;font-family:var(--fm);color:var(--grn);background:rgba(0,232,122,.1);padding:3px 8px;border-radius:20px;border:1px solid rgba(0,232,122,.2);}
+.ico-btn{background:var(--s2);border:1px solid var(--border);color:var(--mut);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;}
+
+/* TABS */
+.tabs{display:flex;overflow-x:auto;scrollbar-width:none;background:var(--s1);border-bottom:1px solid var(--border);position:sticky;top:52px;z-index:99;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex:none;padding:11px 13px;font-size:11px;font-family:var(--fm);font-weight:600;color:var(--mut);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:5px;}
+.tab.on{color:var(--red);border-bottom-color:var(--red);background:rgba(255,45,85,.04);}
+
+/* MAIN */
+.main{padding:16px;}
+.panel{display:none;}
+.panel.on{display:block;}
+
+/* CARDS */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden;}
+.card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,45,85,.2),transparent);}
+.ctitle{font-family:var(--fd);font-size:17px;letter-spacing:1.5px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+
+/* INPUTS */
+.inp{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--txt);font-family:var(--fb);font-size:14px;outline:none;transition:border-color .2s;margin-bottom:10px;}
+.inp:focus{border-color:var(--red);}
+.inp::placeholder{color:var(--mut);}
+select.inp{appearance:none;}
+textarea.inp{resize:vertical;min-height:72px;}
+.lbl{font-size:10px;color:var(--mut);font-family:var(--fm);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;display:block;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 18px;border-radius:10px;font-family:var(--fb);font-weight:600;font-size:13px;cursor:pointer;border:none;transition:all .2s;}
+.btn-r{background:linear-gradient(135deg,var(--red),var(--ora));color:#fff;width:100%;}
+.btn-r:hover{opacity:.9;transform:translateY(-1px);}
+.btn-o{background:transparent;color:var(--mut);border:1px solid var(--border);}
+.btn-o:hover{color:var(--txt);border-color:var(--txt);}
+.btn-sm{padding:7px 13px;font-size:11px;border-radius:8px;}
+.btn-blu{background:linear-gradient(135deg,var(--pur),var(--blu));color:#fff;width:100%;}
+
+/* METRICS */
+.mets{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;}
+.met{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:13px;}
+.m-ico{font-size:18px;margin-bottom:5px;}
+.m-lbl{font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:1px;font-family:var(--fm);margin-bottom:3px;}
+.m-val{font-family:var(--fm);font-size:20px;font-weight:700;line-height:1;}
+.m-sub{font-size:10px;color:var(--mut);margin-top:3px;font-family:var(--fm);}
+
+/* TAGS */
+.tags{display:flex;flex-wrap:wrap;gap:6px;}
+.tag{font-size:11px;padding:4px 10px;border-radius:20px;font-family:var(--fm);border:1px solid;cursor:pointer;}
+.tr{color:var(--red);border-color:rgba(255,45,85,.3);background:rgba(255,45,85,.08);}
+.tg{color:var(--grn);border-color:rgba(0,232,122,.3);background:rgba(0,232,122,.08);}
+.tb{color:var(--blu);border-color:rgba(0,180,255,.3);background:rgba(0,180,255,.08);}
+.tgold{color:var(--gold);border-color:rgba(255,200,66,.3);background:rgba(255,200,66,.08);}
+.tp{color:var(--pur);border-color:rgba(168,85,247,.3);background:rgba(168,85,247,.08);}
+.tpin{color:var(--pin);border-color:rgba(255,110,180,.3);background:rgba(255,110,180,.08);}
+
+/* AI BOX */
+.aibox{background:linear-gradient(135deg,rgba(168,85,247,.07),rgba(0,180,255,.04));border:1px solid rgba(168,85,247,.18);border-radius:12px;padding:14px;margin-bottom:12px;}
+.aitag{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-family:var(--fm);color:var(--pur);background:rgba(168,85,247,.1);padding:3px 8px;border-radius:20px;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;}
+.aitext{font-size:13px;line-height:1.7;}
+
+/* PROGRESS */
+.prog{background:var(--border);height:5px;border-radius:3px;overflow:hidden;margin-top:6px;}
+.progf{height:100%;border-radius:3px;transition:width 1s ease;}
+
+/* VIDEO CARD */
+.vidc{display:flex;align-items:flex-start;gap:10px;padding:12px;background:var(--s2);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:border-color .2s;}
+.vidc:hover{border-color:var(--red);}
+.vthumb{width:80px;height:45px;border-radius:6px;flex-shrink:0;object-fit:cover;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:18px;overflow:hidden;}
+.vthumb img{width:100%;height:100%;object-fit:cover;border-radius:6px;}
+.vinfo{flex:1;min-width:0;}
+.vtitle{font-size:12px;font-weight:500;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.4;}
+.vmeta{display:flex;gap:8px;flex-wrap:wrap;}
+.vmeta span{font-size:10px;color:var(--mut);font-family:var(--fm);}
+.vscore{flex-shrink:0;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:var(--fm);}
+.shi{background:rgba(0,232,122,.15);color:var(--grn);border:1px solid var(--grn);}
+.smd{background:rgba(255,200,66,.15);color:var(--gold);border:1px solid var(--gold);}
+.slo{background:rgba(255,45,85,.15);color:var(--red);border:1px solid var(--red);}
+
+/* CHANNEL CARD */
+.chcard{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:13px;margin-bottom:10px;cursor:pointer;transition:all .2s;position:relative;}
+.chcard:hover{border-color:var(--red);}
+.chcard.sel{border-color:var(--red);background:rgba(255,45,85,.04);}
+.chtop{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.chimg{width:44px;height:44px;border-radius:50%;object-fit:cover;background:var(--s3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;overflow:hidden;}
+.chimg img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.chmeta{flex:1;min-width:0;}
+.chname{font-weight:600;font-size:14px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.chhandle{font-size:11px;color:var(--mut);font-family:var(--fm);}
+.chstats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.chstat{text-align:center;background:var(--s1);border-radius:8px;padding:7px 3px;}
+.chstatv{font-family:var(--fm);font-size:12px;font-weight:700;color:var(--red);}
+.chstatl{font-size:9px;color:var(--mut);margin-top:2px;text-transform:uppercase;letter-spacing:.4px;}
+
+/* COMPETITOR CARD */
+.compcard{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:13px;margin-bottom:8px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:10px;}
+.compcard:hover{border-color:var(--ora);}
+.comp-img{width:40px;height:40px;border-radius:50%;background:var(--s3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;overflow:hidden;}
+.comp-img img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.comp-info{flex:1;min-width:0;}
+.comp-name{font-size:13px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.comp-sub{font-size:10px;color:var(--mut);font-family:var(--fm);}
+.comp-btn{flex-shrink:0;background:rgba(255,107,53,.12);border:1px solid rgba(255,107,53,.25);color:var(--ora);border-radius:8px;padding:6px 10px;font-size:11px;font-family:var(--fm);font-weight:600;cursor:pointer;}
+.comp-link-btn{flex-shrink:0;background:rgba(0,180,255,.1);border:1px solid rgba(0,180,255,.2);color:var(--blu);border-radius:8px;padding:6px 10px;font-size:11px;font-family:var(--fm);font-weight:600;cursor:pointer;margin-left:4px;}
+
+/* TREND CARD */
+.trendcard{display:flex;align-items:center;gap:10px;padding:11px;background:var(--s2);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:border-color .2s;}
+.trendcard:hover{border-color:var(--red);}
+.trank{font-family:var(--fd);font-size:24px;color:var(--red);width:28px;flex-shrink:0;line-height:1;}
+.tinfo{flex:1;}
+.ttitle{font-size:13px;font-weight:500;margin-bottom:3px;}
+.tmeta{font-size:10px;color:var(--mut);font-family:var(--fm);}
+.tfire{font-size:16px;flex-shrink:0;}
+
+/* SCORE RING */
+.sring{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+.ringw{position:relative;width:80px;height:80px;flex-shrink:0;}
+.rsvg{transform:rotate(-90deg);}
+.rbg{fill:none;stroke:var(--border);stroke-width:6;}
+.rfill{fill:none;stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset 1s ease;}
+.rtxt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.rnum{font-family:var(--fm);font-size:20px;font-weight:700;line-height:1;}
+.rlbl{font-size:8px;color:var(--mut);font-family:var(--fm);margin-top:2px;}
+.rinfo{flex:1;}
+.rtitle{font-family:var(--fd);font-size:18px;letter-spacing:1px;margin-bottom:4px;}
+.rverdict{font-size:12px;color:var(--mut);line-height:1.5;}
+
+/* LOADER */
+.ldr{display:flex;flex-direction:column;align-items:center;padding:40px;gap:12px;}
+.lring{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.ltxt{font-family:var(--fm);font-size:11px;color:var(--mut);}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--s2);border:1px solid var(--border);padding:10px 18px;border-radius:20px;font-size:12px;font-family:var(--fm);z-index:999;transition:transform .3s;white-space:nowrap;max-width:90vw;text-align:center;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.ok{border-color:var(--grn);color:var(--grn);}
+.toast.err{border-color:var(--red);color:var(--red);}
+
+/* TOGGLE */
+.toggrp{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;}
+.toggrp::-webkit-scrollbar{display:none;}
+.tog{flex:none;padding:7px 13px;border-radius:8px;font-size:11px;font-family:var(--fm);font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--s2);color:var(--mut);transition:all .2s;}
+.tog.on{background:rgba(255,45,85,.1);border-color:var(--red);color:var(--red);}
+
+/* SECTION HEADER */
+.sechdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.sectitle{font-family:var(--fd);font-size:16px;letter-spacing:1.5px;display:flex;align-items:center;gap:6px;}
+
+/* ACTION ITEM */
+.acti{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.actn{font-family:var(--fm);font-size:11px;background:rgba(255,45,85,.1);color:var(--red);padding:2px 7px;border-radius:4px;flex-shrink:0;}
+.actt{font-size:13px;line-height:1.5;}
+
+/* HIBOX */
+.hibox{background:rgba(255,45,85,.06);border:1px solid rgba(255,45,85,.18);border-radius:10px;padding:12px;margin-bottom:10px;font-size:14px;font-weight:500;line-height:1.6;}
+.hiboxg{background:rgba(0,232,122,.05);border-color:rgba(0,232,122,.18);}
+
+/* DIVIDER */
+.div{height:1px;background:var(--border);margin:14px 0;}
+
+/* EMPTY */
+.empty{text-align:center;padding:40px 20px;color:var(--mut);}
+.empty .eico{font-size:44px;margin-bottom:12px;}
+.empty p{font-size:13px;line-height:1.7;}
+
+/* SHARE BOX */
+.sharebox{background:rgba(0,180,255,.06);border:1px solid rgba(0,180,255,.2);border-radius:10px;padding:12px;margin-bottom:10px;display:flex;align-items:center;gap:10px;}
+.sharelink{flex:1;font-size:11px;font-family:var(--fm);color:var(--blu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sharebtn{flex-shrink:0;background:rgba(0,180,255,.15);border:1px solid rgba(0,180,255,.3);color:var(--blu);border-radius:8px;padding:7px 12px;font-size:11px;font-family:var(--fm);font-weight:600;cursor:pointer;}
+
+/* AUDIENCE BADGE */
+.aud-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:10px;font-family:var(--fm);font-weight:600;margin-bottom:10px;}
+.aud-in{background:rgba(255,200,66,.1);color:var(--gold);border:1px solid rgba(255,200,66,.25);}
+.aud-hi{background:rgba(0,180,255,.1);color:var(--blu);border:1px solid rgba(0,180,255,.25);}
+
+/* SCHEDULE */
+.schitem{display:flex;align-items:center;gap:10px;padding:10px;background:var(--s2);border-radius:8px;margin-bottom:8px;border:1px solid var(--border);}
+.schdate{font-family:var(--fm);font-size:11px;color:var(--blu);flex-shrink:0;text-align:center;background:rgba(0,180,255,.08);padding:4px 8px;border-radius:6px;min-width:52px;}
+.schinfo{flex:1;min-width:0;}
+.schtitle{font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.schch{font-size:10px;color:var(--mut);font-family:var(--fm);margin-top:2px;}
+
+/* NICHE COLOR PILL */
+.niche-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:10px;font-family:var(--fm);font-weight:600;}
+
+/* INPUT ROW */
+.inprow{display:flex;gap:8px;align-items:flex-start;}
+.inprow .inp{flex:1;margin-bottom:0;}
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div class="setup" id="setup">
+  <div class="setup-logo">YT MENTOR</div>
+  <div class="setup-tagline">Real YouTube Data · AI Strategy · Auto Competitors<br>Indian + Global Trends · Full Channel Mentor</div>
+  <div class="setup-card">
+    <label class="slbl">🔑 YouTube Data API Key</label>
+    <input type="password" class="sinp" id="api-inp" placeholder="Apni API key yahan paste karo...">
+    <div class="hint">🔒 Key sirf is device pe save hoti hai — kisi ko nahi bhejti. Google Cloud Console → APIs & Services → Credentials se banao.</div>
+    <button class="sbtn" onclick="startApp()">🚀 Launch YT Mentor Pro</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+
+  <!-- Header -->
+  <div class="hdr">
+    <div class="hdr-l">
+      <div class="hdr-ico">▶</div>
+      <div class="hdr-name">YT MENTOR</div>
+    </div>
+    <div class="hdr-r">
+      <span class="api-ok">✅ LIVE</span>
+      <button class="ico-btn" onclick="resetKey()">⚙️</button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab on" onclick="goTab('mychannels')">📺 My Channels</div>
+    <div class="tab" onclick="goTab('analyze')">🔍 Analyze</div>
+    <div class="tab" onclick="goTab('videos')">🎬 Videos</div>
+    <div class="tab" onclick="goTab('compete')">⚔️ Compete</div>
+    <div class="tab" onclick="goTab('mentor')">🤖 AI Mentor</div>
+    <div class="tab" onclick="goTab('trends')">🔥 Trends</div>
+    <div class="tab" onclick="goTab('plan')">📅 Plan</div>
+  </div>
+
+  <div class="main">
+
+    <!-- MY CHANNELS TAB -->
+    <div class="panel on" id="panel-mychannels">
+      <div class="card">
+        <div class="ctitle"><span>📺</span> MY CHANNELS</div>
+        <div class="inprow" style="margin-bottom:10px;">
+          <input class="inp" id="quick-add-url" placeholder="Channel URL ya @handle daao..." style="margin-bottom:0;">
+          <button class="btn btn-r btn-sm" onclick="quickAddChannel()" style="width:auto;flex-shrink:0;">+ Add</button>
+        </div>
+        <div id="mychannels-list">
+          <div class="empty"><div class="eico">📺</div><p>Abhi koi channel nahi.<br>Upar se channel add karo!</p></div>
+        </div>
+      </div>
+
+      <!-- Active channel quick info -->
+      <div id="active-ch-info" style="display:none;"></div>
+    </div>
+
+    <!-- ANALYZE TAB -->
+    <div class="panel" id="panel-analyze">
+      <div class="card">
+        <div class="ctitle"><span>🔍</span> CHANNEL ANALYZER</div>
+        <label class="lbl">Channel URL / Handle / ID</label>
+        <input class="inp" id="ch-url" placeholder="@channelname ya youtube.com/c/...">
+        <button class="btn btn-r" onclick="analyzeChannel()">📊 Full Channel Analysis</button>
+      </div>
+      <div id="analyze-result"></div>
+    </div>
+
+    <!-- VIDEOS TAB -->
+    <div class="panel" id="panel-videos">
+      <div id="videos-content">
+        <div class="empty"><div class="eico">🎬</div><p>Pehle My Channels se channel select karo<br>ya Analyze tab se analyze karo.</p></div>
+      </div>
+    </div>
+
+    <!-- COMPETE TAB -->
+    <div class="panel" id="panel-compete">
+      <div class="card">
+        <div class="ctitle"><span>⚔️</span> COMPETITOR ANALYSIS</div>
+        <div id="auto-competitors-section">
+          <div class="aibox" style="margin-bottom:12px;">
+            <div class="aitag">🤖 AUTO-DETECTED</div>
+            <div class="aitext" style="font-size:12px;">Apna channel select karo → competitors automatically aa jayenge is niche mein!</div>
+          </div>
+        </div>
+        <div class="div"></div>
+        <label class="lbl">Ya manually competitor analyze karo</label>
+        <input class="inp" id="comp-url" placeholder="@competitorhandle">
+        <button class="btn btn-r" onclick="analyzeCompetitor()">⚔️ Deep Competitor Analysis</button>
+      </div>
+      <div id="compete-result"></div>
+    </div>
+
+    <!-- MENTOR TAB -->
+    <div class="panel" id="panel-mentor">
+      <div class="card">
+        <div class="ctitle"><span>🤖</span> AI MENTOR</div>
+        <div class="aibox">
+          <div class="aitag">✨ CLAUDE AI POWERED</div>
+          <div class="aitext">Video topic daao → Complete viral strategy: title, thumbnail, hook, tags, upload time, sab kuch!</div>
+        </div>
+        <label class="lbl">Video Topic / Title</label>
+        <textarea class="inp" id="mentor-inp" rows="3" placeholder="e.g. 5 Haunted Places in India Nobody Talks About..."></textarea>
+        <label class="lbl">Niche</label>
+        <select class="inp" id="mentor-niche">
+          <option value="horror">😱 Horror / Paranormal</option>
+          <option value="mythology">🏛️ Mythology / History</option>
+          <option value="tech">💻 Tech / Reviews</option>
+          <option value="entertainment">🎭 Entertainment</option>
+          <option value="motivation">💪 Motivation</option>
+          <option value="finance">💰 Finance / Investment</option>
+          <option value="astrology">🔮 Astrology</option>
+          <option value="crime">🔍 Crime / Mystery</option>
+          <option value="spiritual">✝️ Spiritual / Religious</option>
+        </select>
+        <label class="lbl">Language</label>
+        <select class="inp" id="mentor-lang">
+          <option value="Hindi">🇮🇳 Hindi</option>
+          <option value="Hinglish">🔀 Hinglish</option>
+          <option value="English">🇬🇧 English</option>
+        </select>
+        <button class="btn btn-r" onclick="runMentor()">🚀 Get Full Viral Strategy</button>
+      </div>
+      <div id="mentor-result"></div>
+    </div>
+
+    <!-- TRENDS TAB -->
+    <div class="panel" id="panel-trends">
+
+      <!-- Audience Toggle -->
+      <div class="card" style="padding:12px 14px;">
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-r btn-sm" id="aud-in-btn" onclick="setAudience('india',this)" style="flex:1;">🇮🇳 Indian Audience</button>
+          <button class="btn btn-o btn-sm" id="aud-hi-btn" onclick="setAudience('hightier',this)" style="flex:1;">🌍 High Tier (US/UK/AU)</button>
+        </div>
+      </div>
+
+      <div id="aud-context-box"></div>
+
+      <div class="card">
+        <div class="ctitle"><span>🔥</span> TRENDING TOPICS</div>
+        <div class="toggrp" id="niche-togs">
+          <div class="tog on" onclick="loadTrends('horror',this)">Horror</div>
+          <div class="tog" onclick="loadTrends('mythology',this)">Mythology</div>
+          <div class="tog" onclick="loadTrends('tech',this)">Tech</div>
+          <div class="tog" onclick="loadTrends('finance',this)">Finance</div>
+          <div class="tog" onclick="loadTrends('crime',this)">Crime</div>
+          <div class="tog" onclick="loadTrends('spiritual',this)">Spiritual</div>
+          <div class="tog" onclick="loadTrends('motivation',this)">Motivation</div>
+        </div>
+        <div id="trends-list"></div>
+      </div>
+
+      <div class="card">
+        <div class="ctitle"><span>🔑</span> VIRAL KEYWORDS</div>
+        <div id="keywords-box"></div>
+      </div>
+
+      <div class="card">
+        <div class="ctitle"><span>💰</span> MONETIZATION TIPS</div>
+        <div id="monetize-box"></div>
+      </div>
+
+      <div class="card">
+        <div class="ctitle"><span>⏰</span> BEST UPLOAD TIMES</div>
+        <div id="upload-times-box"></div>
+      </div>
+
+    </div>
+
+    <!-- PLAN TAB -->
+    <div class="panel" id="panel-plan">
+      <div class="card">
+        <div class="ctitle"><span>📅</span> CONTENT PLANNER</div>
+        <label class="lbl">Video Idea / Title</label>
+        <textarea class="inp" id="sch-idea" rows="2" placeholder="Video ka topic ya title..."></textarea>
+        <label class="lbl">Upload Date</label>
+        <input type="date" class="inp" id="sch-date">
+        <label class="lbl">Best Upload Time</label>
+        <select class="inp" id="sch-time">
+          <option>7:00 PM IST</option>
+          <option>8:00 PM IST</option>
+          <option>9:00 PM IST</option>
+          <option>10:00 AM IST</option>
+          <option>11:00 AM IST</option>
+          <option>12:00 PM IST</option>
+          <option>6:00 PM IST</option>
+        </select>
+        <label class="lbl">Channel</label>
+        <select class="inp" id="sch-ch-sel"></select>
+        <button class="btn btn-r" onclick="addSchedule()">📌 Add to Plan</button>
+      </div>
+      <div id="plan-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ STATE ============
+let API_KEY = localStorage.getItem('yt_api') || '';
+let myChannels = JSON.parse(localStorage.getItem('yt_mychannels') || '[]');
+let schedules = JSON.parse(localStorage.getItem('yt_sched') || '[]');
+let activeChannel = null; // currently selected channel full data
+let currentVideos = [];
+let currentAudience = 'india';
+
+// ============ INIT ============
+function init() {
+  if (API_KEY) {
+    document.getElementById('setup').classList.add('gone');
+    document.getElementById('app').classList.add('on');
+    renderMyChannels();
+    renderSchedule();
+    loadTrends('horror');
+    setAudience('india');
+  }
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('sch-date').value = today;
+}
+
+function startApp() {
+  const k = document.getElementById('api-inp').value.trim();
+  if (!k || k.length < 20) { showToast('❌ Valid API key daalo', 'err'); return; }
+  API_KEY = k;
+  localStorage.setItem('yt_api', k);
+  document.getElementById('setup').classList.add('gone');
+  document.getElementById('app').classList.add('on');
+  renderMyChannels();
+  loadTrends('horror');
+  setAudience('india');
+  showToast('✅ API Connected!', 'ok');
+}
+
+function resetKey() {
+  if (confirm('API key reset karein?')) { localStorage.removeItem('yt_api'); location.reload(); }
+}
+
+// ============ TABS ============
+function goTab(t) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
+  document.getElementById('panel-' + t).classList.add('on');
+  const ts = ['mychannels','analyze','videos','compete','mentor','trends','plan'];
+  document.querySelectorAll('.tab')[ts.indexOf(t)].classList.add('on');
+}
+
+// ============ YT API ============
+async function ytGet(ep) {
+  const r = await fetch(`https://www.googleapis.com/youtube/v3/${ep}&key=${API_KEY}`);
+  if (!r.ok) { const e = await r.json(); throw new Error(e.error?.message || 'API Error'); }
+  return r.json();
+}
+
+async function resolveChannelId(raw) {
+  raw = raw.trim();
+  if (raw.startsWith('UC') && raw.length === 24) return raw;
+  let h = raw.replace(/https?:\/\/(www\.)?youtube\.com\//,'');
+  if (h.startsWith('@')) {
+    const d = await ytGet(`channels?part=id&forHandle=${encodeURIComponent(h)}`);
+    if (d.items?.length) return d.items[0].id;
+  }
+  if (h.startsWith('channel/')) return h.replace('channel/','');
+  const clean = h.replace(/^(c\/|user\/|@)/,'');
+  try {
+    const d = await ytGet(`channels?part=id&forUsername=${encodeURIComponent(clean)}`);
+    if (d.items?.length) return d.items[0].id;
+  } catch(e){}
+  const s = await ytGet(`search?part=snippet&type=channel&q=${encodeURIComponent(clean)}&maxResults=1`);
+  if (s.items?.length) return s.items[0].snippet.channelId;
+  throw new Error('Channel nahi mila — handle ya URL dobara check karo');
+}
+
+async function fetchChannelFull(chId) {
+  const [chData, videos] = await Promise.all([
+    ytGet(`channels?part=snippet,statistics,brandingSettings,topicDetails&id=${chId}`),
+    fetchVideos(chId, 20)
+  ]);
+  if (!chData.items?.length) throw new Error('Channel data nahi mila');
+  return { ch: chData.items[0], videos };
+}
+
+async function fetchVideos(chId, n=20) {
+  const pl = await ytGet(`channels?part=contentDetails&id=${chId}`);
+  const upId = pl.items[0]?.contentDetails?.relatedPlaylists?.uploads;
+  if (!upId) return [];
+  const items = await ytGet(`playlistItems?part=contentDetails&playlistId=${upId}&maxResults=${n}`);
+  if (!items.items?.length) return [];
+  const ids = items.items.map(i => i.contentDetails.videoId).join(',');
+  const vids = await ytGet(`videos?part=snippet,statistics,contentDetails&id=${ids}`);
+  return vids.items || [];
+}
+
+// ============ QUICK ADD CHANNEL ============
+async function quickAddChannel() {
+  const url = document.getElementById('quick-add-url').value.trim();
+  if (!url) { showToast('❌ URL daalo', 'err'); return; }
+  const list = document.getElementById('mychannels-list');
+  list.innerHTML = `<div class="ldr"><div class="lring"></div><div class="ltxt">Channel add ho raha hai...</div></div>`;
+  try {
+    const chId = await resolveChannelId(url);
+    if (myChannels.find(c => c.id === chId)) { showToast('⚠️ Already added!', 'err'); renderMyChannels(); return; }
+    const { ch, videos } = await fetchChannelFull(chId);
+    const avgV = videos.length ? Math.round(videos.reduce((s,v)=>s+parseInt(v.statistics?.viewCount||0),0)/videos.length) : 0;
+    const niche = detectNiche(ch.snippet.title + ' ' + (ch.snippet.description||''));
+    const entry = {
+      id: chId,
+      name: ch.snippet.title,
+      handle: ch.snippet.customUrl || '',
+      thumb: ch.snippet.thumbnails?.default?.url || '',
+      subs: parseInt(ch.statistics?.subscriberCount||0),
+      videos: parseInt(ch.statistics?.videoCount||0),
+      avgViews: avgV,
+      niche
+    };
+    myChannels.push(entry);
+    localStorage.setItem('yt_mychannels', JSON.stringify(myChannels));
+    document.getElementById('quick-add-url').value = '';
+    renderMyChannels();
+    // Auto set as active
+    selectChannel(entry, { ch, videos });
+    showToast('✅ Channel added!', 'ok');
+  } catch(e) {
+    renderMyChannels();
+    showToast('❌ ' + e.message, 'err');
+  }
+}
+
+function detectNiche(text) {
+  text = text.toLowerCase();
+  if (/horror|ghost|haunted|bhoot|paranormal|scary/.test(text)) return 'horror';
+  if (/myth|histor|temple|mandir|ramayan|mahabharata|vedic/.test(text)) return 'mythology';
+  if (/tech|phone|gadget|review|unbox|laptop|mobile/.test(text)) return 'tech';
+  if (/finance|stock|invest|money|mutual|crypto|sip/.test(text)) return 'finance';
+  if (/crime|murder|mystery|unsolved|detective|cbi/.test(text)) return 'crime';
+  if (/jesus|christ|bible|prayer|church|spiritual|god/.test(text)) return 'spiritual';
+  if (/motivat|inspir|success|life|mindset/.test(text)) return 'motivation';
+  if (/astro|kundli|rashifal|zodiac|planet/.test(text)) return 'astrology';
+  return 'general';
+}
+
+// ============ SELECT CHANNEL ============
+async function selectChannel(entry, fullData) {
+  activeChannel = { entry, ...fullData };
+  currentVideos = fullData.videos;
+  renderMyChannels();
+  renderActiveChannelInfo(entry, fullData);
+  renderVideosTab(fullData.ch, fullData.videos);
+  loadAutoCompetitors(entry.niche, entry.name);
+  updateSchChannels();
+  showToast('✅ ' + entry.name + ' selected', 'ok');
+}
+
+async function loadChannelAndSelect(id) {
+  const entry = myChannels.find(c => c.id === id);
+  if (!entry) return;
+  showToast('⏳ Loading...', '');
+  try {
+    const fullData = await fetchChannelFull(id);
+    await selectChannel(entry, fullData);
+  } catch(e) { showToast('❌ ' + e.message, 'err'); }
+}
+
+// ============ RENDER MY CHANNELS ============
+function renderMyChannels() {
+  updateSchChannels();
+  const list = document.getElementById('mychannels-list');
+  if (!myChannels.length) {
+    list.innerHTML = '<div class="empty"><div class="eico">📺</div><p>Koi channel nahi.<br>Upar URL daao aur add karo!</p></div>';
+    return;
+  }
+  list.innerHTML = myChannels.map(c => `
+    <div class="chcard ${activeChannel?.entry?.id === c.id ? 'sel' : ''}" onclick="loadChannelAndSelect('${c.id}')">
+      <div class="chtop">
+        <div class="chimg">${c.thumb ? `<img src="${c.thumb}" alt="">` : '📺'}</div>
+        <div class="chmeta">
+          <div class="chname">${c.name}</div>
+          <div class="chhandle">${c.handle || c.id} · <span class="niche-pill" style="color:var(--gold);font-size:10px;">${nicheEmoji(c.niche)} ${c.niche}</span></div>
+        </div>
+        <button onclick="event.stopPropagation(); removeMyChannel('${c.id}')" style="background:none;border:none;color:var(--mut);cursor:pointer;font-size:16px;padding:4px 6px;">✕</button>
+      </div>
+      <div class="chstats">
+        <div class="chstat"><div class="chstatv">${fNum(c.subs)}</div><div class="chstatl">Subs</div></div>
+        <div class="chstat"><div class="chstatv">${c.videos}</div><div class="chstatl">Videos</div></div>
+        <div class="chstat"><div class="chstatv">${fNum(c.avgViews)}</div><div class="chstatl">Avg Views</div></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function removeMyChannel(id) {
+  myChannels = myChannels.filter(c => c.id !== id);
+  localStorage.setItem('yt_mychannels', JSON.stringify(myChannels));
+  if (activeChannel?.entry?.id === id) {
+    activeChannel = null;
+    document.getElementById('active-ch-info').style.display = 'none';
+  }
+  renderMyChannels();
+  showToast('🗑️ Removed', 'ok');
+}
+
+function nicheEmoji(n) {
+  return {horror:'😱',mythology:'🏛️',tech:'💻',finance:'💰',crime:'🔍',spiritual:'✝️',motivation:'💪',astrology:'🔮',entertainment:'🎭',general:'📱'}[n]||'📱';
+}
+
+// ============ ACTIVE CHANNEL INFO ============
+function renderActiveChannelInfo(entry, { ch, videos }) {
+  const box = document.getElementById('active-ch-info');
+  box.style.display = 'block';
+  const subs = parseInt(ch.statistics?.subscriberCount||0);
+  const avgV = videos.length ? Math.round(videos.reduce((s,v)=>s+parseInt(v.statistics?.viewCount||0),0)/videos.length) : 0;
+  const health = subs>10000?88:subs>5000?72:subs>1000?55:38;
+  const hc = health>=70?'var(--grn)':health>=50?'var(--gold)':'var(--red)';
+  box.innerHTML = `
+    <div class="card">
+      <div class="ctitle"><span>📊</span> CHANNEL STATS</div>
+      <div class="mets">
+        <div class="met"><div class="m-ico">👥</div><div class="m-lbl">Subscribers</div><div class="m-val">${fNum(subs)}</div></div>
+        <div class="met"><div class="m-ico">👁️</div><div class="m-val">${fNum(avgV)}</div><div class="m-lbl">Avg Views/Video</div></div>
+        <div class="met"><div class="m-ico">🎬</div><div class="m-val">${fNum(parseInt(ch.statistics?.videoCount||0))}</div><div class="m-lbl">Total Videos</div></div>
+        <div class="met"><div class="m-ico">📈</div><div class="m-val" style="color:${hc};font-size:24px;">${health}</div><div class="m-lbl">Health Score</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
+        <button class="btn btn-r btn-sm" onclick="goTab('videos')">🎬 Videos</button>
+        <button class="btn btn-r btn-sm" style="background:linear-gradient(135deg,var(--pur),var(--blu));" onclick="goTab('compete')">⚔️ Competitors</button>
+        <button class="btn btn-r btn-sm" style="background:linear-gradient(135deg,var(--grn),var(--blu));color:#000;" onclick="goTab('mentor')">🤖 AI Strategy</button>
+        <button class="btn btn-r btn-sm" style="background:linear-gradient(135deg,var(--gold),var(--ora));color:#000;" onclick="goTab('trends')">🔥 Trends</button>
+      </div>
+    </div>
+  `;
+}
+
+// ============ ANALYZE TAB ============
+async function analyzeChannel() {
+  const url = document.getElementById('ch-url').value.trim();
+  if (!url) { showToast('❌ URL daalo', 'err'); return; }
+  const res = document.getElementById('analyze-result');
+  res.innerHTML = `<div class="ldr"><div class="lring"></div><div class="ltxt">Channel data fetch ho raha hai...</div></div>`;
+  try {
+    const chId = await resolveChannelId(url);
+    res.innerHTML = `<div class="ldr"><div class="lring"></div><div class="ltxt">Videos aur stats analyze ho rahe hain...</div></div>`;
+    const { ch, videos } = await fetchChannelFull(chId);
+    // Auto-save to my channels
+    if (!myChannels.find(c => c.id === chId)) {
+      const avgV = videos.length ? Math.round(videos.reduce((s,v)=>s+parseInt(v.statistics?.viewCount||0),0)/videos.length) : 0;
+      const niche = detectNiche(ch.snippet.title+' '+(ch.snippet.description||''));
+      const entry = { id:chId, name:ch.snippet.title, handle:ch.snippet.customUrl||'', thumb:ch.snippet.thumbnails?.default?.url||'', subs:parseInt(ch.statistics?.subscriberCount||0), videos:parseInt(ch.statistics?.videoCount||0), avgViews:avgV, niche };
+      myChannels.push(entry);
+      localStorage.setItem('yt_mychannels', JSON.stringify(myChannels));
+      renderMyChannels();
+    }
+    renderAnalysis(ch, videos);
+    renderVideosTab(ch, videos);
+    activeChannel = { entry: myChannels.find(c=>c.id===chId), ch, videos };
+    currentVideos = videos;
+    loadAutoCompetitors(detectNiche(ch.snippet.title), ch.snippet.title);
+    showToast('✅ Analysis complete!', 'ok');
+  } catch(e) {
+    res.innerHTML = `<div class="card"><div style="color:var(--red);">⚠️ ${e.message}</div></div>`;
+  }
+}
+
+function renderAnalysis(ch, videos) {
+  const subs = parseInt(ch.statistics?.subscriberCount||0);
+  const totalV = parseInt(ch.statistics?.viewCount||0);
+  const vCount = parseInt(ch.statistics?.videoCount||0);
+  const avgV = videos.length ? Math.round(videos.reduce((s,v)=>s+parseInt(v.statistics?.viewCount||0),0)/videos.length) : 0;
+  const avgL = videos.length ? Math.round(videos.reduce((s,v)=>s+parseInt(v.statistics?.likeCount||0),0)/videos.length) : 0;
+  const eng = avgV>0?((avgL/avgV)*100).toFixed(1):0;
+  const health = subs>10000?88:subs>5000?72:subs>1000?55:38;
+  const hc = health>=70?'var(--grn)':health>=50?'var(--gold)':'var(--red)';
+  const top = videos.length ? [...videos].sort((a,b)=>parseInt(b.statistics?.viewCount||0)-parseInt(a.statistics?.viewCount||0))[0] : null;
+
+  document.getElementById('analyze-result').innerHTML = `
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div class="chimg" style="width:52px;height:52px;">${ch.snippet.thumbnails?.default?.url?`<img src="${ch.snippet.thumbnails.default.url}" alt="">`:'📺'}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:700;font-size:15px;margin-bottom:3px;">${ch.snippet.title}</div>
+          <div style="font-size:11px;color:var(--mut);font-family:var(--fm);">${ch.snippet.customUrl||ch.id}</div>
+        </div>
+      </div>
+      <div class="mets">
+        <div class="met"><div class="m-ico">👥</div><div class="m-lbl">Subscribers</div><div class="m-val">${fNum(subs)}</div></div>
+        <div class="met"><div class="m-ico">👁️</div><div class="m-lbl">Total Views</div><div class="m-val">${fNum(totalV)}</div></div>
+        <div class="met"><div class="m-ico">🎬</div><div class="m-lbl">Videos</div><div class="m-val">${fNum(vCount)}</div></div>
+        <div class="met"><div class="m-ico">📈</div><div class="m-lbl">Avg Views</div><div class="m-val">${fNum(avgV)}</div></div>
+        <div class="met"><div class="m-ico">❤️</div><div class="m-lbl">Avg Likes</div><div class="m-val">${fNum(avgL)}</div></div>
+        <div class="met"><div class="m-ico">💬</div><div class="m-lbl">Engagement</div><div class="m-val" style="color:${parseFloat(eng)>3?'var(--grn)':'var(--gold)'};">${eng}%</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle"><span>🏥</span> HEALTH SCORE</div>
+      <div class="sring">
+        <div class="ringw">
+          <svg class="rsvg" width="80" height="80" viewBox="0 0 80 80">
+            <circle class="rbg" cx="40" cy="40" r="34"/>
+            <circle class="rfill" cx="40" cy="40" r="34" stroke="${hc}" stroke-dasharray="${2*Math.PI*34}" stroke-dashoffset="${2*Math.PI*34*(1-health/100)}"/>
+          </svg>
+          <div class="rtxt"><div class="rnum" style="color:${hc};">${health}</div><div class="rlbl">SCORE</div></div>
+        </div>
+        <div class="rinfo">
+          <div class="rtitle">${health>=70?'GROWING CHANNEL':health>=50?'NEEDS IMPROVEMENT':'NEEDS URGENT ACTION'}</div>
+          <div class="rverdict">${health>=70?'Channel growing hai. Shorts aur collaborations add karo.':health>=50?'Growth slow hai. Upload frequency badhao, thumbnails improve karo.':'Channel decline mein. Daily Shorts shuru karo aur top 5 videos re-optimize karo.'}</div>
+        </div>
+      </div>
+    </div>
+
+    ${top?`
+    <div class="card">
+      <div class="ctitle"><span>🏆</span> TOP VIDEO</div>
+      <div style="display:flex;gap:10px;align-items:flex-start;">
+        <div class="vthumb">${top.snippet?.thumbnails?.medium?.url?`<img src="${top.snippet.thumbnails.medium.url}" alt="">`:'🎬'}</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;margin-bottom:6px;line-height:1.4;">${top.snippet?.title}</div>
+          <div style="display:flex;gap:10px;">
+            <span style="font-size:11px;color:var(--grn);font-family:var(--fm);">👁 ${fNum(parseInt(top.statistics?.viewCount||0))}</span>
+            <span style="font-size:11px;color:var(--gold);font-family:var(--fm);">👍 ${fNum(parseInt(top.statistics?.likeCount||0))}</span>
+          </div>
+        </div>
+      </div>
+    </div>`:''}
+
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
+      <button class="btn btn-r" onclick="goTab('videos')">🎬 See Videos</button>
+      <button class="btn btn-r" style="background:linear-gradient(135deg,var(--pur),var(--blu));" onclick="goTab('mentor')">🤖 AI Strategy</button>
+    </div>
+  `;
+}
+
+// ============ VIDEOS TAB ============
+function renderVideosTab(ch, videos) {
+  if (!videos.length) {
+    document.getElementById('videos-content').innerHTML = '<div class="empty"><div class="eico">📭</div><p>Videos nahi mile.</p></div>';
+    return;
+  }
+  const sorted = [...videos].sort((a,b) => parseInt(b.statistics?.viewCount||0)-parseInt(a.statistics?.viewCount||0));
+  const avgV = Math.round(videos.reduce((s,v)=>s+parseInt(v.statistics?.viewCount||0),0)/videos.length);
+
+  document.getElementById('videos-content').innerHTML = `
+    <div class="card">
+      <div class="sechdr">
+        <div class="sectitle">🎬 VIDEO PERFORMANCE</div>
+      </div>
+      <div class="toggrp">
+        <div class="tog on" onclick="filterVids('all',this)">All</div>
+        <div class="tog" onclick="filterVids('top',this)">🔥 Top</div>
+        <div class="tog" onclick="filterVids('low',this)">📉 Underperform</div>
+        <div class="tog" onclick="filterVids('recent',this)">🆕 Recent</div>
+      </div>
+      <div id="vids-list">${sorted.map(v=>vidCard(v,avgV)).join('')}</div>
+    </div>
+  `;
+}
+
+function vidCard(v, avgV) {
+  const views = parseInt(v.statistics?.viewCount||0);
+  const likes = parseInt(v.statistics?.likeCount||0);
+  const comments = parseInt(v.statistics?.commentCount||0);
+  const score = avgV>0?Math.min(99,Math.round((views/avgV)*50+(likes/(views||1))*2000)):50;
+  const sc = score>=70?'shi':score>=40?'smd':'slo';
+  const thumb = v.snippet?.thumbnails?.medium?.url;
+  const pubDate = v.snippet?.publishedAt?new Date(v.snippet.publishedAt).toLocaleDateString('en-IN',{day:'numeric',month:'short'}):'';
+  const title = (v.snippet?.title||'').replace(/'/g,"\\'");
+  return `
+    <div class="vidc" onclick="sendToMentor('${title}')">
+      <div class="vthumb">${thumb?`<img src="${thumb}" alt="">`:'🎬'}</div>
+      <div class="vinfo">
+        <div class="vtitle">${v.snippet?.title}</div>
+        <div class="vmeta">
+          <span>👁 ${fNum(views)}</span>
+          <span>👍 ${fNum(likes)}</span>
+          <span>💬 ${fNum(comments)}</span>
+          <span>📅 ${pubDate}</span>
+        </div>
+      </div>
+      <div class="vscore ${sc}">${score}</div>
+    </div>
+  `;
+}
+
+function filterVids(type, el) {
+  document.querySelectorAll('#videos-content .tog').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  if (!currentVideos.length) return;
+  const avgV = Math.round(currentVideos.reduce((s,v)=>s+parseInt(v.statistics?.viewCount||0),0)/currentVideos.length);
+  let vids = [...currentVideos];
+  if (type==='top') vids = vids.sort((a,b)=>parseInt(b.statistics?.viewCount||0)-parseInt(a.statistics?.viewCount||0)).slice(0,10);
+  if (type==='low') vids = vids.sort((a,b)=>parseInt(a.statistics?.viewCount||0)-parseInt(b.statistics?.viewCount||0)).slice(0,10);
+  if (type==='recent') vids = vids.sort((a,b)=>new Date(b.snippet?.publishedAt||0)-new Date(a.snippet?.publishedAt||0)).slice(0,10);
+  if (type==='all') vids = vids.sort((a,b)=>parseInt(b.statistics?.viewCount||0)-parseInt(a.statistics?.viewCount||0));
+  document.getElementById('vids-list').innerHTML = vids.map(v=>vidCard(v,avgV)).join('');
+}
+
+function sendToMentor(title) {
+  document.getElementById('mentor-inp').value = title;
+  goTab('mentor');
+  setTimeout(runMentor, 300);
+}
+
+// ============ AUTO COMPETITORS ============
+const nicheCompetitors = {
+  horror: [
+    {name:'Horror India',handle:'@horrorindia_yt',subs:'284K'},
+    {name:'Scary Side India',handle:'@scarysideindia',subs:'156K'},
+    {name:'Bhoot Times',handle:'@bhoottimes',subs:'98K'},
+    {name:'Dark Secrets India',handle:'@darksecretsindia',subs:'412K'},
+    {name:'Haunted India',handle:'@hauntedindia',subs:'67K'},
+  ],
+  mythology: [
+    {name:'Mythology Stories',handle:'@mythologystories',subs:'521K'},
+    {name:'Ancient India Facts',handle:'@ancientindiafacts',subs:'334K'},
+    {name:'Vedic Knowledge',handle:'@vedicknowledge',subs:'189K'},
+    {name:'Hindu Mythology',handle:'@hindumythology',subs:'678K'},
+    {name:'India History',handle:'@indiahistory',subs:'245K'},
+  ],
+  tech: [
+    {name:'Technical Guruji',handle:'@technicalguruji',subs:'23.4M'},
+    {name:'Trakin Tech',handle:'@trakintech',subs:'8.2M'},
+    {name:'Geeky Ranjit',handle:'@geekyranjit',subs:'4.1M'},
+    {name:'C4ETech',handle:'@c4etech',subs:'2.9M'},
+    {name:'Tech Burner',handle:'@techburner',subs:'6.1M'},
+  ],
+  finance: [
+    {name:'CA Rachana Ranade',handle:'@carachanaranade',subs:'4.6M'},
+    {name:'Pranjal Kamra',handle:'@pranjalkamra',subs:'2.8M'},
+    {name:'Akshat Shrivastava',handle:'@akshatshrivastava',subs:'1.9M'},
+    {name:'Finology Sarthak',handle:'@finologysarthak',subs:'1.2M'},
+    {name:'Labour Law Advisor',handle:'@labourlawadvisor',subs:'3.4M'},
+  ],
+  crime: [
+    {name:'Crime Tak',handle:'@crimeTak',subs:'3.2M'},
+    {name:'True Crime India',handle:'@truecrimeindia',subs:'456K'},
+    {name:'Crime Stories India',handle:'@crimestoriesindia',subs:'289K'},
+    {name:'India Crime Files',handle:'@indiacriimefiles',subs:'134K'},
+    {name:'Murder Mystery India',handle:'@murdermysteryindia',subs:'78K'},
+  ],
+  spiritual: [
+    {name:'Jesus Saves India',handle:'@jessussavesindia',subs:'345K'},
+    {name:'Christian India',handle:'@christianindia',subs:'212K'},
+    {name:'Bible Stories Hindi',handle:'@biblestorieshindi',subs:'189K'},
+    {name:'Miracle Stories',handle:'@miraclestories',subs:'567K'},
+    {name:'Faith Hindi',handle:'@faithhindi',subs:'98K'},
+  ],
+  motivation: [
+    {name:'Sandeep Maheshwari',handle:'@sandepmaheshwari',subs:'28.1M'},
+    {name:'Vivek Bindra',handle:'@drvivekbindra',subs:'21.4M'},
+    {name:'Ujjwal Patni',handle:'@ujjwalpatni',subs:'3.9M'},
+    {name:'Sonu Sharma',handle:'@sonusharma',subs:'5.6M'},
+    {name:'BeerBiceps',handle:'@beerbiceps',subs:'4.8M'},
+  ],
+  general: [
+    {name:'MrBeast India',handle:'@mrbeastindia',subs:'1.2M'},
+    {name:'CarryMinati',handle:'@carryminati',subs:'41.2M'},
+    {name:'Ashish Chanchlani',handle:'@ashishchanchlani',subs:'29.8M'},
+    {name:'BB Ki Vines',handle:'@bbkivines',subs:'26.4M'},
+    {name:'Round2Hell',handle:'@round2hell',subs:'35.1M'},
+  ],
+};
+
+function loadAutoCompetitors(niche, myName) {
+  const comps = nicheCompetitors[niche] || nicheCompetitors.general;
+  const sec = document.getElementById('auto-competitors-section');
+  sec.innerHTML = `
+    <div class="aibox" style="margin-bottom:12px;">
+      <div class="aitag">🤖 AUTO-DETECTED · ${niche.toUpperCase()} NICHE</div>
+      <div class="aitext" style="font-size:12px;">Tere niche mein yeh top channels hain — tap karke deep analysis karo!</div>
+    </div>
+    ${comps.map(c=>`
+      <div class="compcard">
+        <div class="comp-img">📺</div>
+        <div class="comp-info">
+          <div class="comp-name">${c.name}</div>
+          <div class="comp-sub">${c.handle} · 👥 ${c.subs} subs</div>
+        </div>
+        <button class="comp-btn" onclick="setCompUrl('${c.handle}')">Analyze</button>
+        <button class="comp-link-btn" onclick="openYT('${c.handle}')">🔗</button>
+      </div>
+    `).join('')}
+    <div class="div"></div>
+  `;
+}
+
+function setCompUrl(handle) {
+  document.getElementById('comp-url').value = handle;
+  // scroll to analyze btn
+  document.querySelector('#panel-compete .btn-r').scrollIntoView({behavior:'smooth'});
+}
+
+function openYT(handle) {
+  window.open(`https://www.youtube.com/${handle}`, '_blank');
+}
+
+// ============ COMPETITOR ANALYSIS ============
+async function analyzeCompetitor() {
+  const url = document.getElementById('comp-url').value.trim();
+  if (!url) { showToast('❌ Competitor URL daalo', 'err'); return; }
+  const res = document.getElementById('compete-result');
+  res.innerHTML = `<div class="ldr"><div class="lring"></div><div class="ltxt">Competitor ka real data fetch ho raha hai...</div></div>`;
+  try {
+    const compId = await resolveChannelId(url);
+    const { ch, videos } = await fetchChannelFull(compId);
+    res.innerHTML = `<div class="ldr"><div class="lring"></div><div class="ltxt">AI deep analysis kar raha hai...</div></div>`;
+    const subs = parseInt(ch.statistics?.subscriberCount||0);
+    const avgV = videos.length?Math.round(videos.reduce((s,v)=>s+parseInt(v.statistics?.viewCount||0),0)/videos.length):0;
+    const topTitles = videos.slice(0,10).map(v=>v.snippet?.title).join('\n');
+    const topVids = videos.slice(0,5).map(v=>`"${v.snippet?.title}": ${fNum(parseInt(v.statistics?.viewCount||0))} views`).join('\n');
+
+    const myCh = activeChannel?.ch;
+    const myCtx = myCh ? `\nMy Channel: "${myCh.snippet.title}", Subs: ${fNum(parseInt(myCh.statistics?.subscriberCount||0))}` : '';
+
+    const prompt = `YouTube competitive intelligence expert for Indian market.
+
+Competitor: "${ch.snippet.title}" | Subs: ${fNum(subs)} | Avg Views: ${fNum(avgV)}
+Top Videos:\n${topVids}
+Recent Titles:\n${topTitles}${myCtx}
+
+JSON only, no markdown:
+{"strengths":["s1","s2","s3"],"weaknesses":["w1","w2","w3"],"winningFormula":"<what works for them>","titlePattern":"<their title formula>","gapsToExploit":["g1","g2","g3"],"howToBeat":["h1","h2","h3","h4"],"stealableIdeas":["idea1","idea2","idea3","idea4"],"verdict":"<2 line competitive verdict>"}`;
+
+    const r = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const d = await r.json();
+    const txt = d.content.map(i=>i.text||'').join('');
+    const ai = JSON.parse(txt.replace(/```json|```/g,'').trim());
+    renderCompResult(ch, videos, subs, avgV, ai);
+  } catch(e) {
+    res.innerHTML = `<div class="card"><div style="color:var(--red);">⚠️ ${e.message}</div></div>`;
+  }
+}
+
+function renderCompResult(ch, videos, subs, avgV, ai) {
+  const chHandle = ch.snippet.customUrl || ch.id;
+  const ytLink = `https://www.youtube.com/${chHandle}`;
+  document.getElementById('compete-result').innerHTML = `
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <div class="chimg">${ch.snippet.thumbnails?.default?.url?`<img src="${ch.snippet.thumbnails.default.url}" alt="">`:'📺'}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:700;font-size:14px;margin-bottom:2px;">${ch.snippet.title}</div>
+          <div style="font-size:11px;color:var(--mut);font-family:var(--fm);">${chHandle}</div>
+        </div>
+        <button class="comp-link-btn" onclick="window.open('${ytLink}','_blank')">🔗 Open</button>
+      </div>
+
+      <!-- Share link -->
+      <div class="sharebox">
+        <div class="sharelink">${ytLink}</div>
+        <button class="sharebtn" onclick="copyLink('${ytLink}')">📋 Copy</button>
+      </div>
+
+      <div class="mets" style="margin-bottom:0;">
+        <div class="met"><div class="m-ico">👥</div><div class="m-lbl">Subscribers</div><div class="m-val">${fNum(subs)}</div></div>
+        <div class="met"><div class="m-ico">👁️</div><div class="m-lbl">Avg Views</div><div class="m-val">${fNum(avgV)}</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle"><span>💪</span> UNKI STRENGTHS</div>
+      ${ai.strengths?.map(s=>`<div style="display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;"><span style="color:var(--red);flex-shrink:0;">●</span>${s}</div>`).join('')||''}
+      ${ai.winningFormula?`<div class="aibox" style="margin-top:10px;margin-bottom:0;"><div class="aitag">🏆 WINNING FORMULA</div><div class="aitext">${ai.winningFormula}</div></div>`:''}
+    </div>
+
+    <div class="card">
+      <div class="ctitle"><span>😤</span> UNKI WEAKNESSES</div>
+      ${ai.weaknesses?.map(w=>`<div style="display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--mut);"><span style="color:var(--grn);flex-shrink:0;">✓</span>${w}</div>`).join('')||''}
+    </div>
+
+    <div class="card">
+      <div class="ctitle"><span>🎯</span> GAPS TO EXPLOIT</div>
+      ${ai.gapsToExploit?.map((g,i)=>`<div class="acti"><span class="actn">${i+1}</span><span class="actt">${g}</span></div>`).join('')||''}
+    </div>
+
+    <div class="card">
+      <div class="ctitle"><span>⚔️</span> HOW TO BEAT THEM</div>
+      ${ai.howToBeat?.map((h,i)=>`<div class="acti"><span class="actn">${i+1}</span><span class="actt">${h}</span></div>`).join('')||''}
+    </div>
+
+    <div class="card">
+      <div class="ctitle"><span>💡</span> STEALABLE IDEAS</div>
+      ${ai.stealableIdeas?.map(idea=>`
+        <div style="padding:10px;background:var(--s2);border-radius:8px;margin-bottom:8px;font-size:13px;border-left:2px solid var(--gold);cursor:pointer;display:flex;align-items:center;gap:8px;" onclick="sendToMentor('${idea.replace(/'/g,"\\'")}')">
+          <span>💡</span><span style="flex:1;">${idea}</span><span style="font-size:10px;color:var(--mut);font-family:var(--fm);flex-shrink:0;">→ AI Mentor</span>
+        </div>
+      `).join('')||''}
+    </div>
+
+    <div class="aibox">
+      <div class="aitag">🤖 AI VERDICT</div>
+      <div class="aitext">${ai.verdict}</div>
+    </div>
+  `;
+}
+
+function copyLink(url) {
+  navigator.clipboard.writeText(url).then(()=>showToast('📋 Link copied!','ok')).catch(()=>showToast('❌ Copy failed','err'));
+}
+
+// ============ AI MENTOR ============
+async function runMentor() {
+  const inp = document.getElementById('mentor-inp').value.trim();
+  const niche = document.getElementById('mentor-niche').value;
+  const lang = document.getElementById('mentor-lang').value;
+  if (!inp) { showToast('❌ Topic daalo', 'err'); return; }
+  const res = document.getElementById('mentor-result');
+  res.innerHTML = `<div class="ldr"><div class="lring"></div><div class="ltxt">AI full viral strategy bana raha hai...</div></div>`;
+
+  let ctx = '';
+  if (activeChannel?.ch) {
+    const { ch, videos } = activeChannel;
+    const avgV = videos?.length?Math.round(videos.reduce((s,v)=>s+parseInt(v.statistics?.viewCount||0),0)/videos.length):0;
+    const topTitles = videos?.slice(0,5).map(v=>v.snippet?.title).join(', ')||'';
+    ctx = `\nMy Channel: "${ch.snippet.title}" | ${fNum(parseInt(ch.statistics?.subscriberCount||0))} subs | Avg ${fNum(avgV)} views | Top content: ${topTitles}`;
+  }
+
+  const prompt = `You are an expert YouTube growth strategist for Indian content market. Give complete viral strategy.
+
+Topic: "${inp}" | Niche: ${niche} | Language: ${lang}${ctx}
+
+JSON only:
+{"viralScore":<1-100>,"verdict":"<verdict in ${lang}>","optimizedTitle":"<viral title in ${lang}>","altTitles":["<t2>","<t3>"],"thumbnailStrategy":"<exact thumbnail design>","hookScript":"<first 5 seconds in ${lang}>","issues":["i1","i2","i3"],"actionPlan":["a1","a2","a3","a4","a5"],"tags":["t1","t2","t3","t4","t5","t6","t7","t8","t9","t10"],"hashtags":["#h1","#h2","#h3","#h4","#h5"],"descStart":"<first 3 lines of description in ${lang}>","bestDay":"<day>","bestTime":"<time IST>","whyViral":"<reason in ${lang}>","competitorGap":"<opportunity others are missing>"}`;
+
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const d = await r.json();
+    const txt = d.content.map(i=>i.text||'').join('');
+    const json = JSON.parse(txt.replace(/```json|```/g,'').trim());
+    renderMentorResult(json);
+  } catch(e) {
+    res.innerHTML = `<div class="card"><div style="color:var(--red);">⚠️ Analysis failed. Try again.</div></div>`;
+  }
+}
+
+function renderMentorResult(d) {
+  const sc = d.viralScore;
+  const sc_c = sc>=70?'var(--grn)':sc>=40?'var(--gold)':'var(--red)';
+  document.getElementById('mentor-result').innerHTML = `
+    <div class="card">
+      <div class="sring">
+        <div class="ringw">
+          <svg class="rsvg" width="80" height="80" viewBox="0 0 80 80">
+            <circle class="rbg" cx="40" cy="40" r="34"/>
+            <circle class="rfill" cx="40" cy="40" r="34" stroke="${sc_c}" stroke-dasharray="${2*Math.PI*34}" stroke-dashoffset="${2*Math.PI*34*(1-sc/100)}"/>
+          </svg>
+          <div class="rtxt"><div class="rnum" style="color:${sc_c};">${sc}</div><div class="rlbl">VIRAL</div></div>
+        </div>
+        <div class="rinfo"><div class="rtitle">VIRAL SCORE</div><div class="rverdict">${d.verdict}</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle"><span>✏️</span> OPTIMIZED TITLE</div>
+      <div class="hibox">${d.optimizedTitle}</div>
+      ${d.altTitles?.map(t=>`<div style="padding:9px 11px;background:var(--s2);border-radius:7px;font-size:12px;margin-bottom:7px;border-left:2px solid var(--red);">${t}</div>`).join('')||''}
+    </div>
+
+    <div class="card">
+      <div class="ctitle"><span>🖼️</span> THUMBNAIL STRATEGY</div>
+      <div class="aibox" style="margin-bottom:0;"><div class="aitag">🎨 DESIGN GUIDE</div><div class="aitext">${d.thumbnailStrategy}</div></div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle"><span>🎬</span> OPENING HOOK (First 5 sec)</div>
+      <div class="hibox hiboxg" style="font-style:italic;">"${d.hookScript}"</div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle"><span>🚨</span> ISSUES FOUND</div>
+      ${d.issues?.map(i=>`<div style="display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--mut);"><span style="color:var(--red);flex-shrink:0;">✗</span>${i}</div>`).join('')||''}
+    </div>
+
+    <div class="card">
+      <div class="ctitle"><span>✅</span> 5-STEP ACTION PLAN</div>
+      ${d.actionPlan?.map((a,i)=>`<div class="acti"><span class="actn">${i+1}</span><span class="actt">${a}</span></div>`).join('')||''}
+    </div>
+
+    <div class="card">
+      <div class="ctitle"><span>🏷️</span> TAGS & HASHTAGS</div>
+      <div class="tags" style="margin-bottom:10px;">${d.tags?.map(t=>`<span class="tag tb">${t}</span>`).join('')||''}</div>
+      <div class="tags">${d.hashtags?.map(h=>`<span class="tag tp">${h}</span>`).join('')||''}</div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle"><span>📄</span> DESCRIPTION START</div>
+      <div style="background:var(--s2);padding:12px;border-radius:8px;font-size:12px;line-height:1.7;color:var(--mut);">${d.descStart}</div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle"><span>⏰</span> UPLOAD TIMING</div>
+      <div class="mets" style="margin-bottom:0;">
+        <div class="met"><div class="m-ico">📅</div><div class="m-lbl">Best Day</div><div class="m-val" style="font-size:16px;">${d.bestDay}</div></div>
+        <div class="met"><div class="m-ico">🕐</div><div class="m-lbl">Best Time</div><div class="m-val" style="font-size:16px;">${d.bestTime}</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ctitle"><span>🔥</span> WHY IT WILL VIRAL</div>
+      <div class="aibox"><div class="aitag">🤖 AI PREDICTION</div><div class="aitext">${d.whyViral}</div></div>
+      ${d.competitorGap?`<div style="padding:10px;background:rgba(0,232,122,.05);border:1px solid rgba(0,232,122,.15);border-radius:8px;font-size:12px;color:var(--mut);"><span style="color:var(--grn);">💡 Gap: </span>${d.competitorGap}</div>`:''}
+    </div>
+  `;
+}
+
+// ============ TRENDS ============
+const indiaTrends = {
+  horror:[{t:'Ghost Caught on Camera India 2025',v:'4.2M+',f:'🔥🔥🔥'},{t:'Haunted Places Delhi Real Story',v:'2.8M+',f:'🔥🔥🔥'},{t:'Bhoot ki Sachi Kahani',v:'1.9M+',f:'🔥🔥'},{t:'Dark Secrets Indian Railways',v:'1.1M+',f:'🔥🔥'},{t:'Mysterious Village Horror',v:'780K+',f:'🔥'}],
+  mythology:[{t:'Ram Mandir Hidden Secrets',v:'6.1M+',f:'🔥🔥🔥'},{t:'Mahabharat Untold Stories',v:'3.4M+',f:'🔥🔥🔥'},{t:'Ancient India Mystery',v:'2.1M+',f:'🔥🔥'},{t:'Shiva Mystery Science',v:'1.3M+',f:'🔥🔥'},{t:'Vedic Technology Reality',v:'890K+',f:'🔥'}],
+  tech:[{t:'Best Phone Under 15000 2025',v:'9.2M+',f:'🔥🔥🔥'},{t:'Free AI Tools India 2025',v:'4.1M+',f:'🔥🔥🔥'},{t:'YouTube se Paise Kaise Kamayein',v:'3.3M+',f:'🔥🔥'},{t:'ChatGPT Hindi Tips',v:'2.1M+',f:'🔥🔥'},{t:'Best Laptop Under 30000',v:'1.4M+',f:'🔥'}],
+  finance:[{t:'Stock Market Beginners Hindi',v:'5.8M+',f:'🔥🔥🔥'},{t:'Crorepati Kaise Bane SIP',v:'4.2M+',f:'🔥🔥🔥'},{t:'Passive Income India Ideas',v:'2.9M+',f:'🔥🔥'},{t:'Gold vs Bitcoin 2025',v:'1.7M+',f:'🔥🔥'},{t:'Best Mutual Fund 2025',v:'1.1M+',f:'🔥'}],
+  crime:[{t:'Unsolved Murder Mystery India',v:'3.8M+',f:'🔥🔥🔥'},{t:'India ka Sabse Bada Scam',v:'2.4M+',f:'🔥🔥🔥'},{t:'Real Crime Story Hindi',v:'1.6M+',f:'🔥🔥'},{t:'CBI Investigation Secrets',v:'980K+',f:'🔥🔥'},{t:'Dark Truth of India',v:'760K+',f:'🔥'}],
+  spiritual:[{t:'Jesus ki Sachi Kahani Hindi',v:'3.2M+',f:'🔥🔥🔥'},{t:'Bible ke Rahasya Hindi',v:'2.1M+',f:'🔥🔥🔥'},{t:'Prayer Power Real Stories',v:'1.8M+',f:'🔥🔥'},{t:'Miracle Stories India',v:'1.2M+',f:'🔥🔥'},{t:'Faith Healing Truth',v:'780K+',f:'🔥'}],
+  motivation:[{t:'Sandeep Maheshwari Speech 2025',v:'8.4M+',f:'🔥🔥🔥'},{t:'Success Story in Hindi',v:'3.1M+',f:'🔥🔥🔥'},{t:'Life Changing Habits Hindi',v:'2.2M+',f:'🔥🔥'},{t:'Ameer Kaise Bane',v:'1.7M+',f:'🔥🔥'},{t:'Morning Routine Successful',v:'1.1M+',f:'🔥'}],
+};
+
+const hightierTrends = {
+  horror:[{t:'True Horror Stories That Will Keep You Up',v:'12M+',f:'🔥🔥🔥'},{t:'Real Paranormal Activity Caught',v:'8.4M+',f:'🔥🔥🔥'},{t:'Scariest Places on Earth',v:'6.2M+',f:'🔥🔥'},{t:'Haunted House Stories',v:'4.1M+',f:'🔥🔥'},{t:'Real Ghost Encounters',v:'3.8M+',f:'🔥'}],
+  mythology:[{t:'Ancient Civilizations Mysteries',v:'15M+',f:'🔥🔥🔥'},{t:'Lost History of Egypt',v:'9.2M+',f:'🔥🔥🔥'},{t:'Bible vs Science',v:'7.1M+',f:'🔥🔥'},{t:'Greek Gods Real Story',v:'5.4M+',f:'🔥🔥'},{t:'Unexplained Historical Events',v:'4.2M+',f:'🔥'}],
+  tech:[{t:'Best AI Tools 2025 Free',v:'18M+',f:'🔥🔥🔥'},{t:'Make Money With AI',v:'11M+',f:'🔥🔥🔥'},{t:'ChatGPT vs Gemini vs Claude',v:'8.2M+',f:'🔥🔥'},{t:'iPhone vs Android 2025',v:'6.4M+',f:'🔥🔥'},{t:'Best Laptop 2025 Review',v:'4.9M+',f:'🔥'}],
+  finance:[{t:'How I Made $100K Passive Income',v:'14M+',f:'🔥🔥🔥'},{t:'Stock Market for Beginners 2025',v:'9.8M+',f:'🔥🔥🔥'},{t:'Crypto vs Real Estate',v:'7.2M+',f:'🔥🔥'},{t:'ETF vs Index Funds',v:'5.1M+',f:'🔥🔥'},{t:'Financial Freedom in 5 Years',v:'4.4M+',f:'🔥'}],
+  crime:[{t:'Worlds Most Baffling Murders',v:'11M+',f:'🔥🔥🔥'},{t:'Unsolved Crimes Documentary',v:'8.6M+',f:'🔥🔥🔥'},{t:'Serial Killer Psychology',v:'6.4M+',f:'🔥🔥'},{t:'Cold Case Files Real Story',v:'4.8M+',f:'🔥🔥'},{t:'FBI Most Wanted Truth',v:'3.9M+',f:'🔥'}],
+  spiritual:[{t:'Near Death Experience Stories',v:'13M+',f:'🔥🔥🔥'},{t:'Christianity vs Science',v:'8.1M+',f:'🔥🔥🔥'},{t:'Real Miracles Caught on Camera',v:'6.9M+',f:'🔥🔥'},{t:'Heaven Is Real Stories',v:'5.2M+',f:'🔥🔥'},{t:'Prayer Works Science Proof',v:'4.1M+',f:'🔥'}],
+  motivation:[{t:'David Goggins Motivation 2025',v:'16M+',f:'🔥🔥🔥'},{t:'Andrew Tate Mindset Tips',v:'12M+',f:'🔥🔥🔥'},{t:'Wake Up at 5AM Life Change',v:'8.4M+',f:'🔥🔥'},{t:'Atomic Habits Summary',v:'6.7M+',f:'🔥🔥'},{t:'Millionaire Morning Routine',v:'5.2M+',f:'🔥'}],
+};
+
+const indiaKW = {horror:['haunted india','ghost real','bhoot video','horror hindi','paranormal','raat ko mat dekho'],mythology:['mandir rahasya','vedic science','ramayan sach','shiva mystery','ancient india'],tech:['earn online','best phone 2025','ai tools free','youtube tips','viral tricks'],finance:['stock market hindi','passive income','mutual fund','sip return','crorepati kaise'],crime:['unsolved mystery','crime story hindi','scam india','cbi secrets','dark truth'],spiritual:['jesus story hindi','bible rahasya','miracle real','prayer power','christian story'],motivation:['success hindi','life change','ameer bano','morning routine','positive mindset']};
+const hightierKW = {horror:['true horror','paranormal caught','haunted places','ghost stories','scary','real horror'],mythology:['ancient mystery','lost civilization','bible truth','greek myth','unexplained'],tech:['ai tools 2025','make money online','best tech','chatgpt tips','passive income tech'],finance:['passive income','financial freedom','investing 2025','stock market','crypto'],crime:['true crime','cold case','unsolved murder','serial killer','documentary'],spiritual:['near death experience','miracles real','faith','heaven','christian testimony'],motivation:['david goggins','mindset','millionaire habits','5am club','success story']};
+const indiaMonetize = {horror:'Horror Hindi channels CPM: ₹50-200. AdSense + affiliate haunted tour packages + digital products (fear psychology ebooks).',mythology:'Mythology CPM: ₹80-300. Great for spiritual brand deals, temple tour affiliates, devotional app sponsorships.',tech:'Tech CPM: ₹200-800. Best for affiliate links, sponsored reviews, courses.',finance:'Finance CPM: ₹400-1500 (highest!). Perfect for Zerodha/Groww affiliates, finance courses.',crime:'Crime CPM: ₹60-250. True crime podcast crossover + merchandise potential.',spiritual:'Spiritual CPM: ₹40-180. Church donations, devotional apps, merchandise.',motivation:'Motivation CPM: ₹150-600. Courses, coaching, books, seminars.'};
+const hightierMonetize = {horror:'US/UK Horror CPM: $3-8. Merchandise, Patreon, brand deals with thriller brands.',mythology:'High tier Mythology CPM: $4-10. History Channel type sponsorships, documentaries.',tech:'US Tech CPM: $8-25 (very high!). Amazon affiliates, tech brand deals.',finance:'Finance CPM US: $15-50 (highest globally!). Fintech sponsorships, courses.',crime:'True Crime CPM: $5-12. Patreon, merchandise, podcast monetization.',spiritual:'Christian content US CPM: $6-15. Church partnerships, book deals.',motivation:'Motivation US CPM: $8-20. Online courses, coaching, books.'};
+const uploadTimes = {india:'Weekdays: 7-9 PM IST 🔥 | Weekends: 10AM-12PM + 7-10PM IST 🔥🔥 | Shorts: Anytime (24/7 algorithm push)',hightier:'US (EST): 2-4 PM Mon-Wed 🔥🔥🔥 | UK (GMT): 5-7 PM Thu-Fri 🔥🔥 | Australia: 7-9 PM AEST weekends 🔥'};
+
+let currentNiche = 'horror';
+
+function setAudience(aud, el) {
+  currentAudience = aud;
+  document.getElementById('aud-in-btn').className = aud==='india'?'btn btn-r btn-sm':'btn btn-o btn-sm';
+  document.getElementById('aud-hi-btn').className = aud==='hightier'?'btn btn-r btn-sm':'btn btn-o btn-sm';
+  const ctx = document.getElementById('aud-context-box');
+  if (aud==='india') {
+    ctx.innerHTML = `<div class="card" style="padding:12px;margin-bottom:14px;"><span class="aud-badge aud-in">🇮🇳 Indian Audience Mode</span><div style="font-size:12px;color:var(--mut);line-height:1.6;">Hindi/Hinglish content · 1B+ potential viewers · CPM ₹40-1500 · Best: Hindi, Hinglish</div></div>`;
+  } else {
+    ctx.innerHTML = `<div class="card" style="padding:12px;margin-bottom:14px;"><span class="aud-badge aud-hi">🌍 High Tier Audience Mode</span><div style="font-size:12px;color:var(--mut);line-height:1.6;">English content · US/UK/AU/CA viewers · CPM $3-50 · 10-20x higher revenue · Requires English</div></div>`;
+  }
+  loadTrends(currentNiche);
+}
+
+function loadTrends(niche, el) {
+  currentNiche = niche;
+  if (el) { document.querySelectorAll('#niche-togs .tog').forEach(b=>b.classList.remove('on')); el.classList.add('on'); }
+  const data = currentAudience==='india' ? indiaTrends[niche]||indiaTrends.horror : hightierTrends[niche]||hightierTrends.horror;
+  document.getElementById('trends-list').innerHTML = data.map((t,i)=>`
+    <div class="trendcard" onclick="sendToMentor('${t.t.replace(/'/g,"\\'")}')">
+      <div class="trank">${i+1}</div>
+      <div class="tinfo"><div class="ttitle">${t.t}</div><div class="tmeta">📊 ${t.v} views avg · Tap for AI strategy</div></div>
+      <div class="tfire">${t.f}</div>
+    </div>
+  `).join('');
+  const kws = (currentAudience==='india'?indiaKW:hightierKW)[niche]||[];
+  document.getElementById('keywords-box').innerHTML = `<div class="tags">${kws.map(k=>`<span class="tag tgold" onclick="sendToMentor('${k}')">${k}</span>`).join('')}</div>`;
+  const mon = (currentAudience==='india'?indiaMonetize:hightierMonetize)[niche]||'';
+  document.getElementById('monetize-box').innerHTML = `<div class="aibox" style="margin-bottom:0;"><div class="aitag">💰 ${currentAudience==='india'?'INDIA':'HIGH TIER'} MONETIZATION</div><div class="aitext">${mon}</div></div>`;
+  document.getElementById('upload-times-box').innerHTML = `<div class="aibox" style="margin-bottom:0;"><div class="aitag">⏰ BEST TIMES · ${currentAudience==='india'?'🇮🇳 INDIA':'🌍 HIGH TIER'}</div><div class="aitext">${uploadTimes[currentAudience]}</div></div>`;
+}
+
+// ============ SCHEDULE ============
+function updateSchChannels() {
+  const sel = document.getElementById('sch-ch-sel');
+  if (!sel) return;
+  sel.innerHTML = myChannels.length
+    ? myChannels.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')
+    : '<option value="">No channels added yet</option>';
+}
+
+function addSchedule() {
+  const idea = document.getElementById('sch-idea').value.trim();
+  const date = document.getElementById('sch-date').value;
+  const time = document.getElementById('sch-time').value;
+  const chId = document.getElementById('sch-ch-sel').value;
+  if (!idea || !date) { showToast('❌ Idea aur date daalo', 'err'); return; }
+  const ch = myChannels.find(c=>c.id===chId);
+  schedules.push({ id:Date.now(), idea, date, time, chName:ch?.name||'My Channel' });
+  localStorage.setItem('yt_sched', JSON.stringify(schedules));
+  renderSchedule();
+  document.getElementById('sch-idea').value = '';
+  showToast('📌 Added to plan!', 'ok');
+}
+
+function renderSchedule() {
+  updateSchChannels();
+  const list = document.getElementById('plan-list');
+  if (!list) return;
+  if (!schedules.length) { list.innerHTML = '<div class="empty"><div class="eico">📅</div><p>Koi plan nahi hai abhi.<br>Upar se add karo!</p></div>'; return; }
+  const sorted = [...schedules].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  list.innerHTML = `<div class="card"><div class="ctitle"><span>📋</span> UPLOAD PLAN</div>${sorted.map(s=>`
+    <div class="schitem">
+      <div class="schdate">${new Date(s.date).toLocaleDateString('en-IN',{day:'numeric',month:'short'})}<br><span style="font-size:9px;">${s.time}</span></div>
+      <div class="schinfo"><div class="schtitle">${s.idea}</div><div class="schch">📺 ${s.chName}</div></div>
+      <button onclick="delSch(${s.id})" style="background:none;border:none;color:var(--mut);cursor:pointer;font-size:16px;padding:4px;">✕</button>
+    </div>
+  `).join('')}</div>`;
+}
+
+function delSch(id) {
+  schedules = schedules.filter(s=>s.id!==id);
+  localStorage.setItem('yt_sched', JSON.stringify(schedules));
+  renderSchedule();
+}
+
+// ============ UTILS ============
+function fNum(n) {
+  n = parseInt(n)||0;
+  if (n>=1000000) return (n/1000000).toFixed(1)+'M';
+  if (n>=1000) return (n/1000).toFixed(1)+'K';
+  return n.toString();
+}
+
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+// ============ INIT ============
+init();
+</script>
+</body>
+</html>
